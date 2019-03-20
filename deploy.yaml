@@ -1,0 +1,38 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: factorio
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: factorio
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: factorio
+    spec:
+      volumes:
+        - name: factorio-persistent-storage
+          persistentVolumeClaim:
+            claimName: factorio-pv-claim
+      containers:
+        - name: factorio
+          image: dtandersen/factorio:latest
+          imagePullPolicy: Always
+          ports:
+            - name: game-port
+              containerPort: 34197
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 1Gi
+            limits:
+              cpu: 1
+              memory: 1Gi
+          volumeMounts:
+            - mountPath: /factorio
+              name: factorio-persistent-storage
