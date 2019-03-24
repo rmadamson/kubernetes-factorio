@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pv01
+  name: pv02
   labels:
     type: local
 spec:
@@ -14,4 +14,72 @@ spec:
   persistentVolumeReclaimPolicy: Recycle
   storageClassName: manual
   hostPath:
-    path: /data/pv01
+    path: /data/pv02
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv03
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: manual
+  hostPath:
+    path: /data/pv03
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv04
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: manual
+  hostPath:
+    path: /data/pv04
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv05
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: manual
+  hostPath:
+    path: /data/pv05
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv06
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: manual
+  hostPath:
+    path: /data/pv06
