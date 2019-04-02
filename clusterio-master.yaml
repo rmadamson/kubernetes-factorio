@@ -1,0 +1,72 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: factorio-clusterio-master
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: factorio-clusterio-master
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: factorio-clusterio-master
+    spec:
+      volumes:
+        - name: factorio-clusterio-master-volume
+          persistentVolumeClaim:
+            claimName: factorio-clusterio-persistent-storage-master
+      containers:
+        - name: factorio-clusterio-master
+          image: mcweezel/factorio-clusterio:latest
+          imagePullPolicy: Always
+          ports:
+            - name: game-port
+              containerPort: 34197
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 1Gi
+            limits:
+              cpu: 1
+              memory: 1Gi
+          volumeMounts:
+            - mountPath: /factorio
+              name: factorio-clusterio-master-volume
+        - name: factorio-clusterio-sidecar-master
+          image: mcweezel/factorio-clusterio:latest
+          command:
+            - sh
+            - -c
+            - "cd /factorio/factorioClusterio && node master.js"
+          imagePullPolicy: Always
+          ports:
+            - name: http-port
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: 250m
+              memory: 128Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          volumeMounts:
+            - mountPath: /factorio
+              name: factorio-clusterio-master-volume
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: factorio-clusterio-persistent-storage-master
+  labels:
+    app: factorio-clusterio-master
+spec:
+  storageClassName: rook-ceph-block
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
