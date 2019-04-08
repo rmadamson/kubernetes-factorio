@@ -18,12 +18,34 @@ spec:
       volumes:
         - name: factorio-clusterio-master-volume
           persistentVolumeClaim:
-            claimName: factorio-clusterio-persistent-storage-master
+            claimName: factorio-clusterio-persistent-storage-master 
       containers:
-        - name: factorio-clusterio-master
+#        - name: factorio-clusterio-master
+#          image: mcweezel/factorio-clusterio:latest
+#          imagePullPolicy: Always
+#          ports:
+#            - name: game-port
+#              containerPort: 34197
+#          resources:
+#            requests:
+#              cpu: 1000m
+#              memory: 1Gi
+#            limits:
+#              cpu: 1
+#              memory: 1Gi
+#          volumeMounts:
+#            - mountPath: /factorio
+#              name: factorio-clusterio-master-volume
+        - name: factorio-clusterio-sidecar-master
           image: mcweezel/factorio-clusterio:latest
+          command:
+            - sh
+            - -c
+            - "if ! [ -f /factorio/factorioClusterio ]; then cp -a /opt/factorioClusterio /factorio/factorioClusterio; fi && cd /factorio/factorioClusterio && sleep 800000000; exec node master.js"
           imagePullPolicy: Always
           ports:
+            - name: http-port
+              containerPort: 8080
             - name: game-port
               containerPort: 34197
           resources:
@@ -31,28 +53,8 @@ spec:
               cpu: 1000m
               memory: 1Gi
             limits:
-              cpu: 1
+              cpu: 1000m
               memory: 1Gi
-          volumeMounts:
-            - mountPath: /factorio
-              name: factorio-clusterio-master-volume
-        - name: factorio-clusterio-sidecar-master
-          image: mcweezel/factorio-clusterio:latest
-          command:
-            - sh
-            - -c
-            - "cd /factorio/factorioClusterio && node master.js"
-          imagePullPolicy: Always
-          ports:
-            - name: http-port
-              containerPort: 8080
-          resources:
-            requests:
-              cpu: 250m
-              memory: 128Mi
-            limits:
-              cpu: 250m
-              memory: 128Mi
           volumeMounts:
             - mountPath: /factorio
               name: factorio-clusterio-master-volume
@@ -66,7 +68,23 @@ metadata:
 spec:
   storageClassName: rook-ceph-block
   accessModes:
-  - ReadWriteOnce
+  - ReadWriteMany
   resources:
     requests:
       storage: 1Gi
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: factorio-clusterio-https-master
+spec:
+  selector:
+    app: factorio-clusterio-master
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+#  externalIPs:
+#  - 45.62.242.10
+#  - 45.62.241.245
+#  - 45.62.241.235 
