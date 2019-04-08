@@ -4,7 +4,7 @@ kind: ConfigMap
 metadata:
   name: factorio-clusterio-configmap
 data:
-  config.json: /
+  config.json: | 
     {
         "__comment": "Where factorio folder. Should be in the same folder as this config file.",
         "factorioDirectory": "./factorio",
@@ -59,14 +59,14 @@ data:
         "__comment8": "This setting only affects the master. It makes every import for things that arent 'electricity' return a maximum of 0. Effectively disables teleport chests.",
         "disableImportsOfEverythingExceptElectricity": false
     }
-  instanceconfig.json: \
+  instanceconfig.json: |
     {
         "factorioPort": FACTORIOPORT,
         "clientPort": CLIENTPORT,
         "__comment_clientPassword": "This is the rcon password. Its also used for making an instanceID. Make sure its unique and not blank.",
         "clientPassword": "CLIENTPASSWORD"
     }
-  server-settings.json: \
+  server-settings.json: |
     {
       "name": "My totally awesome game",
       "description": "This thing is totally awesome",
@@ -151,13 +151,16 @@ spec:
         - name: factorio-clusterio-client-volume
           persistentVolumeClaim:
             claimName: factorio-clusterio-persistent-storage-client 
+        - name: factorio-clusterio-config-volume
+          configMap:
+            name: factorio-clusterio-configmap 
       containers:
         - name: factorio-clusterio-client
           image: mcweezel/factorio-clusterio:latest
           command:
             - sh
             - -c
-            - "if ! [ -f /factorio/factorioClusterio ]; then cp -a /opt/factorioClusterio /factorio/factorioClusterio; fi && cd /factorio/factorioClusterio && sleep 8000000; exec node client.js"
+            - "if ! [ -f /factorio/factorioClusterio ]; then cp -a /opt/factorioClusterio /factorio/factorioClusterio; fi && cd /factorio/factorioClusterio && cp /data/config/config.json config.json && node client.js manage shared mods add clusterio && node client.js start instance && cp /data/config/server-settings.json instances/instance/server-settings.json && cp /data/config/instanceconfig.json instances/instance/config.json && sleep 8000000; exec node client.js"
           imagePullPolicy: Always
           imagePullPolicy: Always
           ports:
@@ -173,23 +176,8 @@ spec:
           volumeMounts:
             - mountPath: /factorio
               name: factorio-clusterio-client-volume
-#        - name: factorio-clusterio-sidecar-client
-#          image: mcweezel/factorio-clusterio:latest
-#          command:
-#            - sh
-#            - -c
-#            - "if ! [ -f /factorio/factorioClusterio ]; then cp -a /opt/factorioClusterio /factorio/factorioClusterio; fi && cd /factorio/factorioClusterio && exec node client.js"
-#          imagePullPolicy: Always
-#          resources:
-#            requests:
-#              cpu: 250m
-#              memory: 512Mi
-#            limits:
-#              cpu: 250m
-#              memory: 512Mi
-#          volumeMounts:
-#            - mountPath: /factorio
-#              name: factorio-clusterio-client-volume
+            - name: factorio-clusterio-config-volume
+              mountPath: /data/config
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
