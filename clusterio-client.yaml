@@ -25,11 +25,11 @@ data:
         "__commentAuthSecret": "This is a long random string used for generating authentication tokens. Do not share. Regenerates when secret-api-token.txt is deleted.",
         "masterAuthSecret": "MASTERAUTHSECRET",
         "__comment3": "Your factorio.com username for factorio MP services, also username will be admin on new instances",
-        "username": "USERNAME",
+        "username": "MC_Weezel",
         "__comment4": "Token from your factorio.com profile page. Required for MP and mod manager services.",
-        "token": "TOKEN",
+        "token": "c5a64c18fd72138818648632ae7574",
         "__comment7": "Autosave interval for items in the master storage in milliseconds. Defaults to one minute when set to 0 or not set.",
-        "factorio_version": "VERSION",
+        "factorio_version": "0.17.22",
         "__comment5": "General user settings",
         "verify_user_identity": true,
         "auto_pause": false,
@@ -192,3 +192,16 @@ spec:
   resources:
     requests:
       storage: 1Gi
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: factorio-clusterio-client
+spec:
+  type: NodePort
+  selector:
+    app: factorio-clusterio-client
+  ports:
+  - protocol: UDP
+    port: 34197
+    nodePort: 30000
