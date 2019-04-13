@@ -1,4 +1,67 @@
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: factorio-clusterio-configmap-master
+data:
+  secret-api-token.txt: |
+    eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFwaSIsImlhdCI6MTU1NDc2OTEzMSwiZXhwIjoxNTg2MzA1MTMxfQ.MYvma8iP8F00pVaGcXEfw4P3dU7PqPtyEIJXuv7Xq7E
+  config.json: | 
+    {
+        "__comment": "Where factorio folder. Should be in the same folder as this config file.",
+        "factorioDirectory": "./factorio",
+        "instanceDirectory": "./instances",
+        "databaseDirectory": "./database",
+        "__comment1": "IP players should connect to to join your servers, should be portforwarded and stuff",
+        "publicIP": "kubx.weezel.work",
+        "__comment2": "IP the master web server runs at, can be ignored on the master system",
+        "masterIP": "factorio-clusterio-master",
+        "__commentMasterPort": "HTTP port for the master to listen to",
+        "masterPort": 8080,
+        "__commentsslPort": "HTTPS port for the master to listen to. Set to 0 or an empty string to not listen for HTTPS.",
+        "sslPort": 443,
+        "sslCert": "database/certificates/cert.crt",
+        "sslPrivKey": "database/certificates/cert.key",
+        "__commentMasterAuthToken": "Authentication token to connect to the master server. Find it in secret-api-token.txt on the master.",
+        "masterAuthToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImFwaSIsImlhdCI6MTU1NDc2OTEzMSwiZXhwIjoxNTg2MzA1MTMxfQ.MYvma8iP8F00pVaGcXEfw4P3dU7PqPtyEIJXuv7Xq7E",
+        "__commentAuthSecret": "This is a long random string used for generating authentication tokens. Do not share. Regenerates when secret-api-token.txt is deleted.",
+        "masterAuthSecret": "OsS9i3t0PQ_xB7mojihiqvQwa0tNQZWNonhXjGxn5yaZRPLhMB_32nl83wXAh9h5-TwjVfOM4g4TBbnpTP5oxM5UXqjLvWP83ClCt-o8vwtZ03EMf5H8e89SddAEuwFpLSZfoTJFEMZIX79HXQ5sbRUqfUPq8JQqaI_GOf-eZCB1uCzKfRTvaJhj1LZtTlhFBMVHHNM0dEedOsxkEioTN8PlYDrNhgfm_Bu5Io7C0FzkDmjGeNlan8Xw2C35uF4_sSsYNBPu1eT5dU2CO2Nm1VKbd56pWGnOLQ-ZLhMBQmuyAVveqkooG5FDdBSZonU-UQe6YLJ0mS5WWhcNinU9vw",
+        "__comment3": "Your factorio.com username for factorio MP services, also username will be admin on new instances",
+        "username": "MC_Weezel",
+        "__comment4": "Token from your factorio.com profile page. Required for MP and mod manager services.",
+        "token": "c5a64c18fd72138818648632ae7574",
+        "__comment7": "Autosave interval for items in the master storage in milliseconds. Defaults to one minute when set to 0 or not set.",
+        "factorio_version": "0.17.31",
+        "__comment5": "General user settings",
+        "verify_user_identity": true,
+        "auto_pause": false,
+        "allow_commands": "admins-only",
+        "game_password": "thisisagreatpassword",
+        "description": "MC_Weezel Clusterio",
+        "visibility": {
+            "public": true,
+            "lan": true
+        },
+        "__comment6": "Statistic gathering statistics, may affect server performance (master memory usage especially)",
+        "itemStats": {
+            "maxEntries": 60,
+            "entriesPerSecond": 0.01666666667
+        },
+        "logItemTransfers": false,
+        "__comment6.5": "When the master is undersupplied, we have 3 different modes to 'fairly' distribute items. First to ask gets all, dole division using weird formula or experimental neural net tries to make stuff as fair as possible. Feel free to play around.",
+        "disableFairItemDistribution": false,
+        "useNeuralNetDoleDivider": false,
+        "uploadModsToMaster": true,
+        "msBetweenCommands": 10,
+        "allowRemoteCommandExecution": true,
+        "enableCrossServerShout": true,
+        "mirrorAllChat": false,
+        "autosaveInterval": 600000,
+        "disablePrometheusPushgateway": false,
+        "__comment8": "This setting only affects the master. It makes every import for things that arent 'electricity' return a maximum of 0. Effectively disables teleport chests.",
+        "disableImportsOfEverythingExceptElectricity": false
+    }
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -18,46 +81,34 @@ spec:
       volumes:
         - name: factorio-clusterio-master-volume
           persistentVolumeClaim:
-            claimName: factorio-clusterio-persistent-storage-master 
+            claimName: factorio-clusterio-persistent-storage-master
+        - name: factorio-clusterio-config-volume-master
+          configMap:
+            name: factorio-clusterio-configmap-master
       containers:
-#        - name: factorio-clusterio-master
-#          image: mcweezel/factorio-clusterio:latest
-#          imagePullPolicy: Always
-#          ports:
-#            - name: game-port
-#              containerPort: 34197
-#          resources:
-#            requests:
-#              cpu: 1000m
-#              memory: 1Gi
-#            limits:
-#              cpu: 1
-#              memory: 1Gi
-#          volumeMounts:
-#            - mountPath: /factorio
-#              name: factorio-clusterio-master-volume
-        - name: factorio-clusterio-sidecar-master
+        - name: factorio-clusterio-master
           image: mcweezel/factorio-clusterio:latest
           command:
             - sh
             - -c
-            - "if ! [ -f /factorio/factorioClusterio ]; then cp -a /opt/factorioClusterio /factorio/factorioClusterio; fi && cd /factorio/factorioClusterio && sleep 800000000; exec node master.js"
+            - "if ! [ -f /factorio/factorioClusterio ]; then cp -a /opt/factorioClusterio /factorio/factorioClusterio && cd /factorio/factorioClusterio && cp /data/config/config.json config.json && node master.js && cp /data/config/config.json config.json && cp /data/config/secret-api-token.txt secret-api-token.txt; fi && sleep 8000001; exec node master.js"
+          imagePullPolicy: Always
           imagePullPolicy: Always
           ports:
-            - name: http-port
+            - name: web-port
               containerPort: 8080
-            - name: game-port
-              containerPort: 34197
           resources:
             requests:
               cpu: 1000m
               memory: 1Gi
             limits:
-              cpu: 1000m
+              cpu: 1
               memory: 1Gi
           volumeMounts:
             - mountPath: /factorio
               name: factorio-clusterio-master-volume
+            - name: factorio-clusterio-config-volume-master
+              mountPath: /data/config
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -76,15 +127,11 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: factorio-clusterio-https-master
+  name: factorio-clusterio-master
 spec:
   selector:
     app: factorio-clusterio-master
   ports:
-  - protocol: TCP
+  - protocol: TCP 
     port: 8080
     targetPort: 8080
-#  externalIPs:
-#  - 45.62.242.10
-#  - 45.62.241.245
-#  - 45.62.241.235 
