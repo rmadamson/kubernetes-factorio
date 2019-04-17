@@ -29,7 +29,7 @@ data:
         "__comment3": "Your factorio.com username for factorio MP services, also username will be admin on new instances",
         "username": "MC_Weezel",
         "__comment4": "Token from your factorio.com profile page. Required for MP and mod manager services.",
-        "token": "6a3663b91ae9b81d32e1c6257e5cda",
+        "token": "FACTORIO_TOKEN",
         "__comment7": "Autosave interval for items in the master storage in milliseconds. Defaults to one minute when set to 0 or not set.",
         "factorio_version": "0.17.31",
         "__comment5": "General user settings",
@@ -91,7 +91,7 @@ spec:
           command:
             - sh
             - -c
-            - "if ! [ -f /factorio/factorioClusterio ]; then cp -a /opt/factorioClusterio /factorio/factorioClusterio && cd /factorio/factorioClusterio && cp /data/config/config.json config.json && node master.js && cp /data/config/config.json config.json && cp /data/config/secret-api-token.txt secret-api-token.txt; fi && sleep 1; exec node master.js"
+            - "if ! [ -f /factorio/factorioClusterio ]; then cp -a /opt/factorioClusterio /factorio/factorioClusterio && cd /factorio/factorioClusterio && cp /data/config/config.json config.json && node master.js && cp /data/config/config.json config.json && cp /data/config/secret-api-token.txt secret-api-token.txt; fi && sleep 60000; exec node master.js"
           imagePullPolicy: Always
           imagePullPolicy: Always
           ports:

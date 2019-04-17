@@ -27,7 +27,7 @@ data:
         "__comment3": "Your factorio.com username for factorio MP services, also username will be admin on new instances",
         "username": "MC_Weezel",
         "__comment4": "Token from your factorio.com profile page. Required for MP and mod manager services.",
-        "token": "c5a64c18fd72138818648632ae7574",
+        "token": "FACTORIO_TOKEN",
         "__comment7": "Autosave interval for items in the master storage in milliseconds. Defaults to one minute when set to 0 or not set.",
         "factorio_version": "1.17.31",
         "__comment5": "General user settings",
@@ -88,7 +88,7 @@ data:
       "password": "",
     
       "_comment_token": "Authentication token. May be used instead of 'password' above.",
-      "token": "c5a64c18fd72138818648632ae7574",
+      "token": "FACTORIO_TOKEN",
     
       "game_password": "thisisagreatpassword",
     
@@ -234,7 +234,8 @@ spec:
           command:
             - sh 
             - -c 
-            - "if ! [ -f /factorio/factorioClusterio ]; then cp -a /opt/factorioClusterio /factorio/factorioClusterio && cd /factorio/factorioClusterio && cp /data/config/config.json config.json && node client.js manage shared mods add clusterio && node client.js start instance && cp /data/config/server-settings.json instances/instance/server-settings.json && cp /data/config/map-gen-settings.json instances/instance/map-gen-settings.json && cp /data/config/instanceconfig.json instances/instance/config.json && rm instances/instance/saves/* && /opt/factorio/bin/x64/factorio --create instances/instance/saves/mysave.zip --map-gen-settings /data/config/map-gen-settings.json; fi && sleep 1 && exec node client.js start instance"
+            - "if ! [ -f /factorio/factorioClusterio ]; then cp -a /opt/factorioClusterio /factorio/factorioClusterio && cd /factorio/factorioClusterio && cp /data/config/config.json config.json && node client.js manage shared mods add clusterio && node client.js manage shared plugins add https://github.com/Danielv123/playerManager && node client.js start instance-111 && cp /data/config/server-settings.json instances/instance-111/server-settings.json && cp /data/config/map-gen-settings.json instances/instance-111/map-gen-settings.json && cp /data/config/instanceconfig.json instances/instance-111/config.json && rm instances/instance-111/saves/* && /opt/factorio/bin/x64/factorio --create instances/instance-111/saves/mysave.zip --map-gen-settings /data/config/map-gen-settings.json; fi && sleep 1 && exec node client.js start instance-111"
+
           imagePullPolicy: Always
           ports:
             - name: game-port
